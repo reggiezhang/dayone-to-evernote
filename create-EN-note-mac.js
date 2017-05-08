@@ -36,7 +36,7 @@ function getNoteTitle(titleParam, noteText) {
 
 function createNotebook(name) {
     if (!findNotebook(name)) {
-        EN.createNotebook(name);
+        EN.createNotebook(name, {withType: "local only"});
         console.log("Notebook created: %s", name);
     }
 }
