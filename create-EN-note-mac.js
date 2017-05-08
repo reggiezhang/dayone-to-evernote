@@ -37,7 +37,7 @@ function getNoteTitle(titleParam, noteText) {
 function createNotebook(name) {
     if (!findNotebook(name)) {
         EN.createNotebook(name, {withType: "local only"});
-        console.log("Notebook created: %s", name);
+        // console.log("Notebook created: %s", name);
     }
 }
 function findNotebook(name) {
@@ -69,7 +69,7 @@ function run(argv) {
     try {
         createNotebook(notebookName);
         EN.createNote(params);
-        console.log("Note created: %s", doNote['UUID']);
+        // console.log("Note created: %s %s", doNote['UUID'], doNote['Creation Date']);
     } catch (e) {
         console.log(e);
     }
