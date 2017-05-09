@@ -7,13 +7,21 @@
  *
  */
 
+function getEntriesPath(doPath) {
+    return `${doPath}/entries/`;
+}
+
+function getPhotosPath(doPath) {
+    return `${doPath}/photos/`;
+}
+
 function initProgressBar(totalLength) {
     var ProgressBar = require('progress');
     console.log();
-    return new ProgressBar('Importing [:bar] :current/:total  :percent  elapsed: :elapseds  eta: :etas', {
-        complete: '=',
-        incomplete: ' ',
-        width: 40,
+    return new ProgressBar('╢:bar╟ :current/:total  :percent  elapsed: :elapseds  eta: :etas', {
+        complete: '▋',
+        incomplete: '░',
+        width: 50,
         total: totalLength
     });
 }
@@ -21,9 +29,9 @@ function initProgressBar(totalLength) {
 function prepareDoJsonFile(doPath, filename) {
     var fs = require('fs');
     var plist = require('plist');
-    var obj = plist.parse(fs.readFileSync(`${doPath}/entries/${filename}`, 'utf8'));
+    var obj = plist.parse(fs.readFileSync(`${getEntriesPath(doPath)}/${filename}`, 'utf8'));
     var doJsonFilePath = `${require('os').tmpdir()}/${obj['UUID']}.json`;
-    var photoPath = `${doPath}/photos/${obj['UUID']}.jpg`;
+    var photoPath = `${getPhotosPath(doPath)}${obj['UUID']}.jpg`;
     if (fs.existsSync(photoPath)) obj['Photo Path'] = photoPath;
     if (obj['Tags'] == undefined) obj['Tags'] = new Array();
     obj['Tags'][obj['Tags'].length] = 'dayone';
@@ -41,8 +49,8 @@ function main(argv) {
     if (!program.args.length) program.help();
 
     var notebookName = `Dayone: ${new Date().toDateString()}`;
-    var journalsDir = program.args[0];
-    var entriesPath = `${journalsDir}/entries/`;
+    var doPath = program.args[0];
+    var entriesPath = getEntriesPath(doPath);
 
     var fs = require('fs');
     var entriesDir = fs.readdirSync(entriesPath);
@@ -50,7 +58,7 @@ function main(argv) {
     require('async-foreach').forEach(entriesDir, function (filename) {
         bar.tick(1);
         var done = this.async();
-        var doJsonFilePath = prepareDoJsonFile(journalsDir, filename);
+        var doJsonFilePath = prepareDoJsonFile(doPath, filename);
         try {
             var shellCmd = `${__dirname}/create-EN-note-mac.js '${doJsonFilePath}' '${notebookName}'`;
             require('child_process').execSync(shellCmd, { stdio: [0, 1, 2] });
