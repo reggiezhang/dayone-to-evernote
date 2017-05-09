@@ -22,13 +22,13 @@ function prepareDoJsonFile(doPath, filename) {
     var fs = require('fs');
     var plist = require('plist');
     var obj = plist.parse(fs.readFileSync(`${doPath}/entries/${filename}`, 'utf8'));
-    var noteTempFilePath = `${__dirname}/${obj['UUID']}.json`;
+    var doJsonFilePath = `${require('os').tmpdir()}/${obj['UUID']}.json`;
     var photoPath = `${doPath}/photos/${obj['UUID']}.jpg`;
     if (fs.existsSync(photoPath)) obj['Photo Path'] = photoPath;
     if (obj['Tags'] == undefined) obj['Tags'] = new Array();
     obj['Tags'][obj['Tags'].length] = 'dayone';
-    fs.writeFileSync(noteTempFilePath, JSON.stringify(obj));
-    return noteTempFilePath;
+    fs.writeFileSync(doJsonFilePath, JSON.stringify(obj));
+    return doJsonFilePath;
 }
 
 function main(argv) {
