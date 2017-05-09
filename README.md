@@ -10,6 +10,7 @@ dayone-to-evernote-mac.js ~/Dropbox/Journal_dayone
 - [child_process](https://www.npmjs.com/package/child_process)
 - [progress](https://www.npmjs.com/package/progress)
 - [async-foreach](https://www.npmjs.com/package/async-foreach)
+- [commander](https://www.npmjs.com/package/commander)
 ```
-npm install -g plist progress async-foreach
+npm install -g plist progress async-foreach commander
 ```
