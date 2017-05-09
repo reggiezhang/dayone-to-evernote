@@ -45,9 +45,10 @@ function main(argv) {
     var entriesPath = `${journalsDir}/entries/`;
 
     var fs = require('fs');
-    var files = fs.readdirSync(entriesPath);
-    var bar = initProgressBar(files.length);
-    require('async-foreach').forEach(files, function (filename) {
+    var entriesDir = fs.readdirSync(entriesPath);
+    var bar = initProgressBar(entriesDir.length);
+    require('async-foreach').forEach(entriesDir, function (filename) {
+        bar.tick(1);
         var done = this.async();
         var doJsonFilePath = prepareDoJsonFile(journalsDir, filename);
         try {
@@ -57,8 +58,7 @@ function main(argv) {
             console.log(e);
         } finally {
             fs.unlinkSync(doJsonFilePath);
-            setTimeout(done, 1);
-            bar.tick(1);
+            setImmediate(done);
         }
     });
 }
