@@ -5,7 +5,7 @@ Import Day One Classic journals to Evernote on MacOS
 ```
 npm install -g dayone-to-evernote
 ```
-Usage
+## Usage
 ```
 dayone-to-evernote ~/Dropbox/Journal_dayone
 ```
