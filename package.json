@@ -1,6 +1,6 @@
 {
   "name": "dayone-to-evernote",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Import Day One Classic journals to Evernote on MacOS",
   "main": "dayone-to-evernote.js",
   "scripts": {
@@ -17,6 +17,9 @@
     "Classic;",
     "macos"
   ],
+  "bin": {
+    "dayone-to-evernote": "./dayone-to-evernote.js"
+  },
   "author": "Reggie Zhang",
   "license": "LGPL-3.0",
   "bugs": {
