@@ -42,7 +42,7 @@ function prepareDoJsonFile(doPath, filename) {
 function main(argv) {
     var program = require('commander');
     program
-        .version('0.1.2')
+        .version('0.1.3')
         .usage("<Journal_dayone_dir>")
         .arguments('<Journal_dayone_dir>')
         .parse(argv);
