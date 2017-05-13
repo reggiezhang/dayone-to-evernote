@@ -1,0 +1,32 @@
+{
+  "name": "dayone-to-evernote",
+  "version": "0.0.1",
+  "description": "Import Day One Classic journals to Evernote on MacOS",
+  "main": "dayone-to-evernote.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/reggiezhang/dayone-to-evernote.git"
+  },
+  "keywords": [
+    "dayone;",
+    "Day",
+    "One",
+    "Classic;",
+    "macos"
+  ],
+  "author": "Reggie Zhang",
+  "license": "LGPL-3.0",
+  "bugs": {
+    "url": "https://github.com/reggiezhang/dayone-to-evernote/issues"
+  },
+  "homepage": "https://github.com/reggiezhang/dayone-to-evernote#readme",
+  "dependencies": {
+    "async-foreach": "^0.1.3",
+    "commander": "^2.9.0",
+    "plist": "^2.1.0",
+    "progress": "^2.0.0"
+  }
+}
