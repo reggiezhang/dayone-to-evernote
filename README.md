@@ -1,7 +1,7 @@
 
 ## Import Dayone Classic journals to Evernote on MacOS
 ```
-dayone-to-evernote-mac.js ~/Dropbox/Journal_dayone
+dayone-to-evernote.js ~/Dropbox/Journal_dayone
 ```
 
 ## Dependencies
