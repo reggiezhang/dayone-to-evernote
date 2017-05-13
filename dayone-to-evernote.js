@@ -60,7 +60,7 @@ function main(argv) {
         var done = this.async();
         var doJsonFilePath = prepareDoJsonFile(doPath, filename);
         try {
-            var shellCmd = `${__dirname}/create-EN-note-mac.js '${doJsonFilePath}' '${notebookName}'`;
+            var shellCmd = `${__dirname}/lib/create-EN-note-mac.js '${doJsonFilePath}' '${notebookName}'`;
             require('child_process').execSync(shellCmd, { stdio: [0, 1, 2] });
         } catch (e) {
             console.log(e);
