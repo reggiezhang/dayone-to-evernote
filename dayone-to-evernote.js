@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /*
- * dayone-to-evernote-mac.js
+ * dayone-to-evernote.js
  * Copyright (C) 2017 Reggie Zhang <reggy.zhang@gmail.com>
  * Licensed under the terms of The GNU Lesser General Public License (LGPLv3):
  * http://www.opensource.org/licenses/lgpl-3.0.html
