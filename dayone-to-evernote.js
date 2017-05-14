@@ -18,10 +18,10 @@ function getPhotosPath(doPath) {
 function initProgressBar(totalLength) {
     var ProgressBar = require('progress');
     console.log();
-    return new ProgressBar('╢:bar╟ :current/:total  :percent  elapsed: :elapseds  eta: :etas', {
-        complete: '▋',
-        incomplete: '░',
-        width: 50,
+    return new ProgressBar(':percent|:bar|  :current/:total  elapsed: :elapseds  eta: :etas', {
+        complete: '█',
+        incomplete: ' ',
+        width: 40,
         total: totalLength
     });
 }
