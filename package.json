@@ -34,5 +34,9 @@
     "plist": "^2.1.0",
     "progress": "^2.0.0",
     "uuid": "^3.0.1"
+  },
+  "devDependencies": {
+    "eslint": "^3.19.0",
+    "eslint-config-google": "^0.7.1"
   }
 }
