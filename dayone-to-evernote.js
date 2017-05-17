@@ -54,7 +54,7 @@ function preparePrarmsFile(doPath, filename, notebookName) {
     var doNote = getDoNote(doPath, filename);
     var params = new Object();
     params.withText = doNote['Entry Text'];
-    params.title = getNoteTitle(params.withText); 
+    params.title = getNoteTitle(params.withText);
     params.notebook = notebookName;
     params.tags = doNote['Tags'];
     params.created = new Date(doNote['Creation Date']);
@@ -91,8 +91,9 @@ function getEntries(doPath, afterDate) {
 function main(argv) {
     const evernote = require('evernote-jxa');
     var program = require('commander');
+    require('pkginfo')(module, 'version');
     program
-        .version('0.1.4')
+        .version(module.exports.version)
         .option('-a, --after <date>', 'date with ISO8601 format. e.g. 2016-05-10T03:08:07+08:00', Date.parse)
         .arguments('<Journal_dayone_dir>')
         .parse(argv);

@@ -30,6 +30,7 @@
     "async-foreach": "^0.1.3",
     "commander": "^2.9.0",
     "evernote-jxa": "^0.1.3",
+    "pkginfo": "^0.4.0",
     "plist": "^2.1.0",
     "progress": "^2.0.0",
     "uuid": "^3.0.1"
