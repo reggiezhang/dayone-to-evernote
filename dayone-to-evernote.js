@@ -65,7 +65,7 @@ function getEntries(doPath, afterDate) {
   let entriesPath = getEntriesPath(doPath);
   let entriesDir = require('fs').readdirSync(entriesPath);
   if (afterDate === undefined) return entriesDir;
-  let entries = entriesDir.filter(function(item) {
+  let entries = entriesDir.filter(function compareNoteDate(item) {
     let fs = require('fs');
     let plist = require('plist');
     let obj = plist.parse(fs.readFileSync(`${getEntriesPath(doPath)}/${item}`, 'utf8'));
@@ -94,7 +94,7 @@ function main(argv) {
   let entries = getEntries(doPath, program.after);
   let bar = initProgressBar(entries.length);
   evernote.createNotebook(notebookName);
-  require('async-foreach').forEach(entries, function(filename) {
+  require('async-foreach').forEach(entries, function createNote(filename) {
     bar.tick(1);
     let done = this.async();
     let paramsFilePath = preparePrarmsFile(doPath, filename, notebookName);
@@ -104,7 +104,7 @@ function main(argv) {
       console.log(e);
     } finally {
       fs.unlinkSync(paramsFilePath);
-      setImmediate(done);
+      setTimeout(done, 1);
     }
   });
 }
