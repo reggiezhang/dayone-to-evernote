@@ -15,15 +15,56 @@ function getPhotosPath(doPath) {
   return `${doPath}/photos/`;
 }
 
-function initProgressBar(totalLength) {
+function getSyncMetaDirPath(doPath) {
+  return `${doPath}/.dayone-to-evernote/`;
+}
+
+function getSyncMetaFilePath(doPath, filename) {
+  const syncMetaDirPath = getSyncMetaDirPath(doPath);
+  return `${syncMetaDirPath}/.${filename}.json`;
+}
+
+function getEntryMd5(doPath, filename) {
+  const md5file = require('md5-file');
+  return md5file.sync(`${getEntriesPath(doPath)}/${filename}`);
+}
+
+function getPhotoMd5(doPath, uuid) {
+  const fs = require('fs');
+  const md5file = require('md5-file');
+  let photoPath = `${getPhotosPath(doPath)}${uuid}.jpg`;
+  return fs.existsSync(photoPath) ? md5file.sync(photoPath) : 'md5';
+}
+
+function initProgressBar(totalLength, notebookName, counter) {
   let ProgressBar = require('progress');
   console.log();
   return new ProgressBar(':percent|:bar|  :current/:total  elapsed: :elapseds  eta: :etas', {
     complete: '█',
     incomplete: ' ',
-    width: 40,
+    width: 20,
     total: totalLength,
+    renderThrottle: 0,
+    clear: false,
+    callback: function importCompleted() {  // Method which will display type of Animal
+      if (counter.created > 0) {
+        console.log(`${counter.created} note(s) created in [${notebookName}], ${counter.updated} note(s) updated.`);
+      } else {
+        console.log(`${counter.created} note(s) created, ${counter.updated} note(s) updated.`);
+      }
+    },
   });
+}
+
+function loadSyncMeta(doPath, filename) {
+  let syncMeta = null;
+  const fs = require('fs');
+  const syncMetaDirPath = getSyncMetaDirPath(doPath);
+  if (!fs.existsSync(syncMetaDirPath)) fs.mkdirSync(syncMetaDirPath);
+  const syncMetaFilePath = getSyncMetaFilePath(doPath, filename);
+  if (!fs.existsSync(syncMetaFilePath)) return syncMeta;
+  syncMeta = JSON.parse(fs.readFileSync(syncMetaFilePath, 'utf8'));
+  return syncMeta;
 }
 
 function getDoNote(doPath, filename) {
@@ -81,6 +122,36 @@ function getEntries(doPath, afterDate) {
   return entries;
 }
 
+function shouldSync(doPath, filename) { // return syncMeta if should sync, otherwise return null
+  const evernote = require('evernote-jxa');
+  let doNote = getDoNote(doPath, filename);
+  let latestEntryMd5 = getEntryMd5(doPath, filename);
+  let latestPhotoMd5 = getPhotoMd5(doPath, doNote.UUID);
+  let syncMeta = loadSyncMeta(doPath, filename);
+  if (!syncMeta) {
+    syncMeta = {'path': getSyncMetaFilePath(doPath, filename), 'uuid': doNote.UUID, 'entry-md5': latestEntryMd5, 'photo-md5': latestPhotoMd5, doNote};
+    return syncMeta;
+  } else {
+    syncMeta.doNote = doNote;
+    if (latestEntryMd5 !== syncMeta['entry-md5'] || latestPhotoMd5 !== syncMeta['photo-md5']) {
+      syncMeta['entry-md5'] = latestEntryMd5;
+      syncMeta['photo-md5'] = latestPhotoMd5;
+      const nbName = evernote.deleteNote(syncMeta.noteId.trim());
+      if (nbName) syncMeta.notebook = nbName;
+      return syncMeta;
+    }
+    return null;
+  }
+}
+function saveSyncMeta(doPath, syncMeta) {
+  const fs = require('fs');
+  syncMeta.date = new Date();
+  delete syncMeta['doNote'];
+  delete syncMeta['notebook'];
+  const fd = fs.openSync(syncMeta.path, 'w');
+  fs.writeSync(fd, JSON.stringify(syncMeta, null, '    '));
+  fs.closeSync(fd);
+}
 function main(argv) {
   const evernote = require('evernote-jxa');
   let program = require('commander');
@@ -98,20 +169,28 @@ function main(argv) {
 
   let fs = require('fs');
   let entries = getEntries(doPath, program.after);
-  let bar = initProgressBar(entries.length);
+  const counter = { 'created': 0, 'updated': 0 }; // eslint-disable-line
+  let bar = initProgressBar(entries.length, notebookName, counter);
   evernote.createNotebook(notebookName);
+
+
   require('async-foreach').forEach(entries, function createNote(filename) {
-    bar.tick(1);
     let done = this.async();
-    let paramsFilePath = preparePrarmsFile(doPath, filename, notebookName);
-    try {
-      evernote.createNote(paramsFilePath);
-    } catch (e) {
-      console.log(e);
-    } finally {
-      fs.unlinkSync(paramsFilePath);
-      setTimeout(done, 1);
+    let syncMeta = shouldSync(doPath, filename);
+    if (syncMeta) {
+      let paramsFilePath = preparePrarmsFile(doPath, filename, syncMeta.notebook ? syncMeta.notebook : notebookName);
+      try {
+        syncMeta.notebook ? ++counter.updated : ++counter.created;
+        syncMeta.noteId = evernote.createNote(paramsFilePath);
+        saveSyncMeta(doPath, syncMeta);
+      } catch (e) {
+        console.log(e);
+      } finally {
+        fs.unlinkSync(paramsFilePath);
+      }
     }
+    bar.tick(1);
+    setTimeout(done, 1);
   });
 }
 
