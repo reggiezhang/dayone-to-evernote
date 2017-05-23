@@ -113,6 +113,7 @@ function getEntries(doPath, afterDate) {
   let entriesDir = require('fs').readdirSync(entriesPath);
   if (afterDate === undefined) return entriesDir;
   let entries = entriesDir.filter(function compareNoteDate(item) {
+    if (/^\./.test(item)) return false;
     let fs = require('fs');
     let plist = require('plist');
     let obj = plist.parse(fs.readFileSync(`${getEntriesPath(doPath)}/${item}`, 'utf8'));
@@ -176,6 +177,10 @@ function main(argv) {
 
   require('async-foreach').forEach(entries, function createNote(filename) {
     let done = this.async();
+    if (/^\./.test(filename)) {
+      bar.tick(1);
+      setTimeout(done, 1);
+    }
     let syncMeta = shouldSync(doPath, filename);
     if (syncMeta) {
       let paramsFilePath = preparePrarmsFile(doPath, filename, syncMeta.notebook ? syncMeta.notebook : notebookName);
