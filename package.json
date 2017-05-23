@@ -11,11 +11,13 @@
     "url": "git+https://github.com/reggiezhang/dayone-to-evernote.git"
   },
   "keywords": [
-    "dayone;",
-    "Day",
-    "One",
-    "Classic;",
-    "macos"
+    "dayone",
+    "Day One Classic",
+    "macos",
+    "evernote",
+    "osa",
+    "applescript",
+    "jxa"
   ],
   "bin": {
     "dayone-to-evernote": "./dayone-to-evernote.js"
