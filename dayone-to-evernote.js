@@ -49,10 +49,11 @@ function preparePrarmsFile(doPath, filename, notebookName) {
     params.latitude = doNote.Location.Latitude;
     params.longitude = doNote.Location.Longitude;
   }
-  params.attachments = [`${getEntriesPath(doPath)}/${filename}`];
+  params.attachments = [];
   if (doNote['Photo Path']) {
     params.attachments.push(doNote['Photo Path']);
   }
+  params.attachments.push(`${getEntriesPath(doPath)}/${filename}`);
 
   const uuidV4 = require('uuid/v4');
   const fs = require('fs');
