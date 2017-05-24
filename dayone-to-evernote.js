@@ -134,7 +134,8 @@ function shouldSync(doPath, filename) { // return syncMeta if should sync, other
     return syncMeta;
   } else {
     syncMeta.doNote = doNote;
-    if (latestEntryMd5 !== syncMeta['entry-md5'] || latestPhotoMd5 !== syncMeta['photo-md5']) {
+    if (latestEntryMd5 !== syncMeta['entry-md5'] || latestPhotoMd5 !== syncMeta['photo-md5']
+      || !evernote.findNote(syncMeta.noteId.trim())) {
       syncMeta['entry-md5'] = latestEntryMd5;
       syncMeta['photo-md5'] = latestPhotoMd5;
       const nbName = evernote.deleteNote(syncMeta.noteId.trim());
