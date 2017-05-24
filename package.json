@@ -1,6 +1,6 @@
 {
   "name": "dayone-to-evernote",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Import Day One Classic journals to Evernote on MacOS",
   "main": "dayone-to-evernote.js",
   "scripts": {
