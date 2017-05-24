@@ -186,22 +186,23 @@ function main(argv) {
     if (/^\./.test(filename)) {
       bar.tick(1);
       setTimeout(done, 1);
-    }
-    let syncMeta = shouldSync(doPath, filename);
-    if (syncMeta) {
-      let paramsFilePath = preparePrarmsFile(doPath, filename, syncMeta.notebook ? syncMeta.notebook : notebookName);
-      try {
-        syncMeta.notebook ? ++counter.updated : ++counter.created;
-        syncMeta.noteId = evernote.createNote(paramsFilePath);
-        saveSyncMeta(doPath, syncMeta);
-      } catch (e) {
-        console.log(e);
-      } finally {
-        fs.unlinkSync(paramsFilePath);
+    } else {
+      let syncMeta = shouldSync(doPath, filename);
+      if (syncMeta) {
+        let paramsFilePath = preparePrarmsFile(doPath, filename, syncMeta.notebook ? syncMeta.notebook : notebookName);
+        try {
+          syncMeta.notebook ? ++counter.updated : ++counter.created;
+          syncMeta.noteId = evernote.createNote(paramsFilePath);
+          saveSyncMeta(doPath, syncMeta);
+        } catch (e) {
+          console.log(e);
+        } finally {
+          fs.unlinkSync(paramsFilePath);
+        }
       }
+      bar.tick(1);
+      setTimeout(done, 1);
     }
-    bar.tick(1);
-    setTimeout(done, 1);
   });
 }
 
