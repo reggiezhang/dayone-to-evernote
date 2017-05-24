@@ -10,9 +10,3 @@ npm install -g dayone-to-evernote
 dayone-to-evernote ~/Dropbox/Journal_dayone
 ```
 
-## Force fully resync
-```
-rm -r ~/Dropbox/Journal_dayone/.dayone-to-evernote
-dayone-to-evernote ~/Dropbox/Journal_dayone
-```
-
