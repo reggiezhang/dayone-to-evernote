@@ -153,6 +153,10 @@ function saveSyncMeta(doPath, syncMeta) {
   fs.writeSync(fd, JSON.stringify(syncMeta, null, '    '));
   fs.closeSync(fd);
 }
+function resetSyncState(reset, doPath) {
+  if (!reset) return;
+  require('fs-extra').emptyDirSync(getSyncMetaDirPath(doPath));
+}
 function main(argv) {
   const evernote = require('evernote-jxa');
   let program = require('commander');
@@ -160,6 +164,7 @@ function main(argv) {
   program
     .version(module.exports.version)
     .option('-a, --after <date>', 'date with ISO8601 format. e.g. 2016-05-10T03:08:07+08:00', Date.parse)
+    .option('-r, --reset', 'reset sync state, fully sync will be performed.')
     .arguments('<Journal_dayone_dir>')
     .parse(argv);
   if (!program.args.length
@@ -172,6 +177,7 @@ function main(argv) {
   let entries = getEntries(doPath, program.after);
   const counter = { 'created': 0, 'updated': 0 }; // eslint-disable-line
   let bar = initProgressBar(entries.length, notebookName, counter);
+  resetSyncState(program.reset, doPath);
   evernote.createNotebook(notebookName);
 
 
