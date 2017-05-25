@@ -124,6 +124,9 @@ function getEntries(doPath, afterDate) {
 }
 
 function prepareSyncMeta(doPath, filename) { // return syncMeta if should sync, otherwise return null
+  if (/^\./.test(filename)) {
+    return null;
+  }
   const evernote = require('evernote-jxa');
   let doNote = getDoNote(doPath, filename);
   let latestEntryMd5 = getEntryMd5(doPath, filename);
@@ -184,29 +187,24 @@ function main(argv) {
 
   require('async-foreach').forEach(entries, function createNote(filename) {
     let done = this.async();
-    if (/^\./.test(filename)) {
-      bar.tick(1);
-      setTimeout(done, 1);
-    } else {
-      let syncMeta = prepareSyncMeta(doPath, filename);
-      if (syncMeta) {
-        let paramsFilePath = preparePrarmsFile(doPath, filename, syncMeta.notebook ? syncMeta.notebook : notebookName);
-        try {
-          syncMeta.notebook ? ++counter.updated : ++counter.created;
-          if (counter.created > 0) {
-            evernote.createNotebook(notebookName);
-          }
-          syncMeta.noteId = evernote.createNote(paramsFilePath);
-          saveSyncMeta(doPath, syncMeta);
-        } catch (e) {
-          console.log(e);
-        } finally {
-          fs.unlinkSync(paramsFilePath);
+    let syncMeta = prepareSyncMeta(doPath, filename);
+    if (syncMeta) {
+      let paramsFilePath = preparePrarmsFile(doPath, filename, syncMeta.notebook ? syncMeta.notebook : notebookName);
+      try {
+        syncMeta.notebook ? ++counter.updated : ++counter.created;
+        if (counter.created > 0) {
+          evernote.createNotebook(notebookName);
         }
+        syncMeta.noteId = evernote.createNote(paramsFilePath);
+        saveSyncMeta(doPath, syncMeta);
+      } catch (e) {
+        console.log(e);
+      } finally {
+        fs.unlinkSync(paramsFilePath);
       }
-      bar.tick(1);
-      setTimeout(done, 1);
     }
+    bar.tick(1);
+    setTimeout(done, 1);
   });
 }
 
