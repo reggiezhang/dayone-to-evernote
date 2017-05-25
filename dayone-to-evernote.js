@@ -165,13 +165,15 @@ function main(argv) {
   program
     .version(module.exports.version)
     .option('-a, --after <date>', 'date with ISO8601 format. e.g. 2016-05-10T03:08:07+08:00', Date.parse)
+    .option('-n, --notebook <notebook>', 'Target Notebook Name, a local notebook will be created if not specified.')
     .option('-r, --reset', 'reset sync state, fully sync will be performed.')
     .arguments('<Journal_dayone_dir>')
     .parse(argv);
   if (!program.args.length
     || program.after !== undefined && isNaN(program.after)) program.help();
 
-  let notebookName = `Dayone: ${new Date().toDateString()}`;
+  let notebookName = program.notebook;
+  if (!notebookName) notebookName = `Dayone: ${new Date().toDateString()}`;
   let doPath = program.args[0];
 
   let fs = require('fs');
