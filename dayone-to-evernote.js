@@ -123,7 +123,7 @@ function getEntries(doPath, afterDate) {
   return entries;
 }
 
-function shouldSync(doPath, filename) { // return syncMeta if should sync, otherwise return null
+function prepareSyncMeta(doPath, filename) { // return syncMeta if should sync, otherwise return null
   const evernote = require('evernote-jxa');
   let doNote = getDoNote(doPath, filename);
   let latestEntryMd5 = getEntryMd5(doPath, filename);
@@ -188,7 +188,7 @@ function main(argv) {
       bar.tick(1);
       setTimeout(done, 1);
     } else {
-      let syncMeta = shouldSync(doPath, filename);
+      let syncMeta = prepareSyncMeta(doPath, filename);
       if (syncMeta) {
         let paramsFilePath = preparePrarmsFile(doPath, filename, syncMeta.notebook ? syncMeta.notebook : notebookName);
         try {
