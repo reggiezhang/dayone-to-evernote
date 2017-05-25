@@ -179,8 +179,6 @@ function main(argv) {
   const counter = { 'created': 0, 'updated': 0 }; // eslint-disable-line
   let bar = initProgressBar(entries.length, notebookName, counter);
   resetSyncState(program.reset, doPath);
-  evernote.createNotebook(notebookName);
-
 
   require('async-foreach').forEach(entries, function createNote(filename) {
     let done = this.async();
@@ -193,6 +191,9 @@ function main(argv) {
         let paramsFilePath = preparePrarmsFile(doPath, filename, syncMeta.notebook ? syncMeta.notebook : notebookName);
         try {
           syncMeta.notebook ? ++counter.updated : ++counter.created;
+          if (counter.created > 0) {
+            evernote.createNotebook(notebookName);
+          }
           syncMeta.noteId = evernote.createNote(paramsFilePath);
           saveSyncMeta(doPath, syncMeta);
         } catch (e) {
