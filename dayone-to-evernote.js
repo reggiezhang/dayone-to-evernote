@@ -141,8 +141,10 @@ function prepareSyncMeta(doPath, filename) { // return syncMeta if should sync, 
       || syncMeta.noteId === undefined || !evernote.findNote(syncMeta.noteId.trim())) {
       syncMeta['entry-md5'] = latestEntryMd5;
       syncMeta['photo-md5'] = latestPhotoMd5;
-      const nbName = evernote.deleteNote(syncMeta.noteId.trim());
-      if (nbName) syncMeta.notebook = nbName;
+      if (syncMeta.noteId === undefined) {
+        const nbName = evernote.deleteNote(syncMeta.noteId.trim());
+        if (nbName) syncMeta.notebook = nbName;
+      }
       return syncMeta;
     }
     return null;
