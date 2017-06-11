@@ -6,7 +6,7 @@
  * http://www.opensource.org/licenses/lgpl-3.0.html
  *
  */
-
+'use-strict';
 function getEntriesPath(doPath) {
   return `${doPath}/entries/`;
 }
