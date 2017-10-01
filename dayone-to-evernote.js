@@ -15,13 +15,13 @@ function composePhotosPath(doPath) {
   return `${doPath}/photos/`;
 }
 
-function composeSyncMetaDirPath(doPath) {
+function composeSyncLogDirPath(doPath) {
   return `${doPath}/.dayone-to-evernote/`;
 }
 
 function composeSyncLogPath(doPath, filename) {
-  const syncMetaDirPath = composeSyncMetaDirPath(doPath);
-  return `${syncMetaDirPath}/.${filename}.json`;
+  const syncLogDirPath = composeSyncLogDirPath(doPath);
+  return `${syncLogDirPath}/.${filename}.json`;
 }
 
 function md5ForEntry(doPath, filename) {
@@ -57,14 +57,14 @@ function initProgressBar(totalLength, notebookName, counter) {
 }
 
 function loadSyncLog(doPath, filename) {
-  let syncMeta = null;
+  let syncLog = null;
   const fs = require('fs');
-  const syncMetaDirPath = composeSyncMetaDirPath(doPath);
-  if (!fs.existsSync(syncMetaDirPath)) fs.mkdirSync(syncMetaDirPath);
-  const syncMetaFilePath = composeSyncLogPath(doPath, filename);
-  if (!fs.existsSync(syncMetaFilePath)) return syncMeta;
-  syncMeta = JSON.parse(fs.readFileSync(syncMetaFilePath, 'utf8'));
-  return syncMeta;
+  const syncLogDirPath = composeSyncLogDirPath(doPath);
+  if (!fs.existsSync(syncLogDirPath)) fs.mkdirSync(syncLogDirPath);
+  const syncLogFilePath = composeSyncLogPath(doPath, filename);
+  if (!fs.existsSync(syncLogFilePath)) return syncLog;
+  syncLog = JSON.parse(fs.readFileSync(syncLogFilePath, 'utf8'));
+  return syncLog;
 }
 
 function loadDoNote(doPath, filename) {
@@ -123,7 +123,7 @@ function loadEntries(doPath, afterDate) {
   return entries;
 }
 
-function prepareSyncLog(doPath, filename) { // return syncMeta if should sync, otherwise return null
+function prepareSyncLog(doPath, filename) { // return syncLog if should sync, otherwise return null
   if (/^\./.test(filename)) {
     return null;
   }
@@ -150,18 +150,18 @@ function prepareSyncLog(doPath, filename) { // return syncMeta if should sync, o
     return null;
   }
 }
-function saveSyncLog(doPath, syncMeta) {
+function saveSyncLog(doPath, syncLog) {
   const fs = require('fs');
-  syncMeta.date = new Date();
-  delete syncMeta['doNote'];
-  delete syncMeta['notebook'];
-  const fd = fs.openSync(syncMeta.path, 'w');
-  fs.writeSync(fd, JSON.stringify(syncMeta, null, '    '));
+  syncLog.date = new Date();
+  delete syncLog['doNote'];
+  delete syncLog['notebook'];
+  const fd = fs.openSync(syncLog.path, 'w');
+  fs.writeSync(fd, JSON.stringify(syncLog, null, '    '));
   fs.closeSync(fd);
 }
 function resetSyncState(reset, doPath) {
   if (!reset) return;
-  require('fs-extra').emptyDirSync(composeSyncMetaDirPath(doPath));
+  require('fs-extra').emptyDirSync(composeSyncLogDirPath(doPath));
 }
 function main(argv) {
   const evernote = require('evernote-jxa');
