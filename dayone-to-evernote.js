@@ -7,32 +7,32 @@
  *
  */
 'use-strict';
-function getEntriesPath(doPath) {
+function composeEntriesPath(doPath) {
   return `${doPath}/entries/`;
 }
 
-function getPhotosPath(doPath) {
+function composePhotosPath(doPath) {
   return `${doPath}/photos/`;
 }
 
-function getSyncMetaDirPath(doPath) {
+function composeSyncMetaDirPath(doPath) {
   return `${doPath}/.dayone-to-evernote/`;
 }
 
-function getSyncMetaFilePath(doPath, filename) {
-  const syncMetaDirPath = getSyncMetaDirPath(doPath);
+function composeSyncLogPath(doPath, filename) {
+  const syncMetaDirPath = composeSyncMetaDirPath(doPath);
   return `${syncMetaDirPath}/.${filename}.json`;
 }
 
-function getEntryMd5(doPath, filename) {
+function md5ForEntry(doPath, filename) {
   const md5file = require('md5-file');
-  return md5file.sync(`${getEntriesPath(doPath)}/${filename}`);
+  return md5file.sync(`${composeEntriesPath(doPath)}/${filename}`);
 }
 
-function getPhotoMd5(doPath, uuid) {
+function md5ForPhoto(doPath, uuid) {
   const fs = require('fs');
   const md5file = require('md5-file');
-  let photoPath = `${getPhotosPath(doPath)}${uuid}.jpg`;
+  let photoPath = `${composePhotosPath(doPath)}${uuid}.jpg`;
   return fs.existsSync(photoPath) ? md5file.sync(photoPath) : 'md5';
 }
 
@@ -56,30 +56,30 @@ function initProgressBar(totalLength, notebookName, counter) {
   });
 }
 
-function loadSyncMeta(doPath, filename) {
+function loadSyncLog(doPath, filename) {
   let syncMeta = null;
   const fs = require('fs');
-  const syncMetaDirPath = getSyncMetaDirPath(doPath);
+  const syncMetaDirPath = composeSyncMetaDirPath(doPath);
   if (!fs.existsSync(syncMetaDirPath)) fs.mkdirSync(syncMetaDirPath);
-  const syncMetaFilePath = getSyncMetaFilePath(doPath, filename);
+  const syncMetaFilePath = composeSyncLogPath(doPath, filename);
   if (!fs.existsSync(syncMetaFilePath)) return syncMeta;
   syncMeta = JSON.parse(fs.readFileSync(syncMetaFilePath, 'utf8'));
   return syncMeta;
 }
 
-function getDoNote(doPath, filename) {
+function loadDoNote(doPath, filename) {
   const fs = require('fs');
   const plist = require('plist');
-  let doNote = plist.parse(fs.readFileSync(`${getEntriesPath(doPath)}/${filename}`, 'utf8'));
-  let photoPath = `${getPhotosPath(doPath)}${doNote['UUID']}.jpg`;
+  let doNote = plist.parse(fs.readFileSync(`${composeEntriesPath(doPath)}/${filename}`, 'utf8'));
+  let photoPath = `${composePhotosPath(doPath)}${doNote['UUID']}.jpg`;
   if (fs.existsSync(photoPath)) doNote['Photo Path'] = photoPath;
   if (doNote['Tags'] == undefined) doNote['Tags'] = [];
   doNote['Tags'][doNote['Tags'].length] = 'dayone';
   return doNote;
 }
 
-function preparePrarmsFile(doPath, filename, notebookName) {
-  let doNote = getDoNote(doPath, filename);
+function prepareEvernotePrarmsFile(doPath, filename, notebookName) {
+  let doNote = loadDoNote(doPath, filename);
   let params = {};
   params.withText = doNote['Entry Text'];
   params.title = getNoteTitle(params.withText);
@@ -94,7 +94,7 @@ function preparePrarmsFile(doPath, filename, notebookName) {
   if (doNote['Photo Path']) {
     params.attachments.push(doNote['Photo Path']);
   }
-  params.attachments.push(`${getEntriesPath(doPath)}/${filename}`);
+  params.attachments.push(`${composeEntriesPath(doPath)}/${filename}`);
 
   const uuidV4 = require('uuid/v4');
   const fs = require('fs');
@@ -108,49 +108,49 @@ function getNoteTitle(noteText) {
   return noteText.split('\n')[0];
 }
 
-function getEntries(doPath, afterDate) {
-  let entriesPath = getEntriesPath(doPath);
+function loadEntries(doPath, afterDate) {
+  let entriesPath = composeEntriesPath(doPath);
   let entriesDir = require('fs').readdirSync(entriesPath);
   if (afterDate === undefined) return entriesDir;
   let entries = entriesDir.filter(function compareNoteDate(item) {
     if (/^\./.test(item)) return false;
     let fs = require('fs');
     let plist = require('plist');
-    let obj = plist.parse(fs.readFileSync(`${getEntriesPath(doPath)}/${item}`, 'utf8'));
+    let obj = plist.parse(fs.readFileSync(`${composeEntriesPath(doPath)}/${item}`, 'utf8'));
     let noteDate = new Date(obj['Creation Date']);
     return noteDate > afterDate;
   });
   return entries;
 }
 
-function prepareSyncMeta(doPath, filename) { // return syncMeta if should sync, otherwise return null
+function prepareSyncLog(doPath, filename) { // return syncMeta if should sync, otherwise return null
   if (/^\./.test(filename)) {
     return null;
   }
   const evernote = require('evernote-jxa');
-  let doNote = getDoNote(doPath, filename);
-  let latestEntryMd5 = getEntryMd5(doPath, filename);
-  let latestPhotoMd5 = getPhotoMd5(doPath, doNote.UUID);
-  let syncMeta = loadSyncMeta(doPath, filename);
-  if (!syncMeta) {
-    syncMeta = {'path': getSyncMetaFilePath(doPath, filename), 'uuid': doNote.UUID, 'entry-md5': latestEntryMd5, 'photo-md5': latestPhotoMd5, doNote};
-    return syncMeta;
+  let doNote = loadDoNote(doPath, filename);
+  let latestEntryMd5 = md5ForEntry(doPath, filename);
+  let latestPhotoMd5 = md5ForPhoto(doPath, doNote.UUID);
+  let syncLog = loadSyncLog(doPath, filename);
+  if (!syncLog) {
+    syncLog = {'path': composeSyncLogPath(doPath, filename), 'uuid': doNote.UUID, 'entry-md5': latestEntryMd5, 'photo-md5': latestPhotoMd5, doNote};
+    return syncLog;
   } else {
-    syncMeta.doNote = doNote;
-    if (latestEntryMd5 !== syncMeta['entry-md5'] || latestPhotoMd5 !== syncMeta['photo-md5']
-      || syncMeta.noteId === undefined || !evernote.findNote(syncMeta.noteId.trim())) {
-      syncMeta['entry-md5'] = latestEntryMd5;
-      syncMeta['photo-md5'] = latestPhotoMd5;
-      if (syncMeta.noteId !== undefined) {
-        const nbName = evernote.deleteNote(syncMeta.noteId.trim());
-        if (nbName) syncMeta.notebook = nbName;
+    syncLog.doNote = doNote;
+    if (latestEntryMd5 !== syncLog['entry-md5'] || latestPhotoMd5 !== syncLog['photo-md5']
+      || syncLog.noteId === undefined || !evernote.findNote(syncLog.noteId.trim())) {
+      syncLog['entry-md5'] = latestEntryMd5;
+      syncLog['photo-md5'] = latestPhotoMd5;
+      if (syncLog.noteId !== undefined) {
+        const nbName = evernote.deleteNote(syncLog.noteId.trim());
+        if (nbName) syncLog.notebook = nbName;
       }
-      return syncMeta;
+      return syncLog;
     }
     return null;
   }
 }
-function saveSyncMeta(doPath, syncMeta) {
+function saveSyncLog(doPath, syncMeta) {
   const fs = require('fs');
   syncMeta.date = new Date();
   delete syncMeta['doNote'];
@@ -161,7 +161,7 @@ function saveSyncMeta(doPath, syncMeta) {
 }
 function resetSyncState(reset, doPath) {
   if (!reset) return;
-  require('fs-extra').emptyDirSync(getSyncMetaDirPath(doPath));
+  require('fs-extra').emptyDirSync(composeSyncMetaDirPath(doPath));
 }
 function main(argv) {
   const evernote = require('evernote-jxa');
@@ -182,23 +182,23 @@ function main(argv) {
   let doPath = program.args[0];
 
   let fs = require('fs');
-  let entries = getEntries(doPath, program.after);
+  let entries = loadEntries(doPath, program.after);
   const counter = { 'created': 0, 'updated': 0 }; // eslint-disable-line
   let bar = initProgressBar(entries.length, notebookName, counter);
   resetSyncState(program.reset, doPath);
 
   require('async-foreach').forEach(entries, function createNote(filename) {
     let done = this.async();
-    let syncMeta = prepareSyncMeta(doPath, filename);
-    if (syncMeta) {
-      let paramsFilePath = preparePrarmsFile(doPath, filename, syncMeta.notebook ? syncMeta.notebook : notebookName);
+    let syncLog = prepareSyncLog(doPath, filename);
+    if (syncLog) {
+      let paramsFilePath = prepareEvernotePrarmsFile(doPath, filename, syncLog.notebook ? syncLog.notebook : notebookName);
       try {
-        syncMeta.notebook ? ++counter.updated : ++counter.created;
+        syncLog.notebook ? ++counter.updated : ++counter.created;
         if (counter.created > 0) {
           evernote.createNotebook(notebookName);
         }
-        syncMeta.noteId = evernote.createNote(paramsFilePath);
-        saveSyncMeta(doPath, syncMeta);
+        syncLog.noteId = evernote.createNote(paramsFilePath);
+        saveSyncLog(doPath, syncLog);
       } catch (e) {
         console.log(e);
       } finally {
